@@ -1,0 +1,9 @@
+trigger PreventDuplicateName on Account (before insert) {
+// Prevent user from entering duplicate Account name
+    for(Account accObj:trigger.new){
+        List<Account> acc = [select ID, name from Account where name =:accObj.name];
+        if(acc.size()>0){
+            accObj.name.addError('Sorry, duplicate name not allowed');
+        }
+    }
+}
