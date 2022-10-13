@@ -1,0 +1,10 @@
+trigger PreventNameUpdation on Account (before update) {
+// Prevent user from changing name of Account
+
+for(Account accNewObj:trigger.new){
+    Account accOldObj = trigger.oldMap.get(accNewObj.ID);
+    if(accNewObj.name != accOldObj.name){
+        accNewObj.name.addError('Sorry, you cannot update/change name');
+        }
+    }
+}
