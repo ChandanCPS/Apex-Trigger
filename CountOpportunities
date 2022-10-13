@@ -1,0 +1,29 @@
+trigger OpportunityCount on Opportunity (after insert, after delete){
+// Write a trigger to count number of Opportunities associated with an Account, increase/decerase if we add/delete 'em
+// and also count the total amount of the Opportunities and show the amount in an amount field.
+
+    set<ID> setOfAccID = new set<ID>();
+    if(Trigger.new != null && !Trigger.new.isEmpty()){
+    for(Opportunity oppoObj:Trigger.new){
+        setOfAccId.add(oppoObj.AccountId);
+        }
+    }
+     if(Trigger.old != null && !Trigger.old.isEmpty()){
+     for(Opportunity oppoObj:Trigger.old){
+        setOfAccId.add(oppoObj.AccountId);
+        }
+     }
+    List<Account> accListToAdd = new List<Account>();
+    for(Account accQuery : [SELECT ID, name, Number_of_Opportunities__c, OppoAmount__c, (select ID,Amount from opportunities) from Account where ID in:setOfAccId]) {
+        Decimal count =0;
+        accQuery.Number_of_Opportunities__c = accQuery.opportunities.size();
+        for(opportunity oppp : accQuery.opportunities ){
+            count = count+ oppp.Amount;
+     }
+        accQuery.OppoAmount__c = count;
+        accListToAdd.add(accQuery);
+    }
+    if(!accListToAdd.isEmpty()){
+    UPDATE accListToAdd;
+    }
+}
