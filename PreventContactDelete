@@ -1,0 +1,8 @@
+trigger PreventContactDelete on Contact (before delete) {
+// Prevent user from deleting Contact if it is related to Account. Let him delete is it's not.
+for(Contact conObj:Trigger.old){
+    if(conObj.AccountID!=null){
+        conObj.addError('Sorry, you cannot delete this Contact as it is associated with Account');
+        }
+    }
+}
