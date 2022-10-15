@@ -1,0 +1,26 @@
+trigger contactType on Contact (after insert, after delete) {
+// Write a trigger to add Contact's contactType into Account's allTypes field. Delete when prompted.
+set<ID> setOfAccID = new set<ID>();
+if(trigger.new!=null && !trigger.new.isEmpty()){
+for(Contact conObj:Trigger.new){
+    setOfAccID.add(conObj.AccountID);
+    }
+}
+if(trigger.old!=null && !trigger.old.isEmpty()){
+    for(Contact conObj:Trigger.old){
+        setOfAccID.add(conObj.AccountID);
+        }
+    }
+List<Account> accListToAdd = new List<Account>();
+for(Account accQuery: [select ID, allTypes__c, (select ID, contactType__c from Contacts) from Account where ID in:setOfAccID]){
+    string value = '';
+    for(Contact con:accQuery.contacts){
+        value = con.contactType__c !=null? value + con.contactType__c :value+'';
+    }
+    accQuery.allTypes__c = value;
+    accListToAdd.add(accQuery);
+}
+if(!accListToAdd.isEmpty()){
+    UPDATE accListToAdd;
+    }
+}
