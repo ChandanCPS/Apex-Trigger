@@ -1,0 +1,19 @@
+trigger AccountAmountPremium on Account (after update) {
+// When Account's Amount crosses 30,000, add 'premium' prefix on its 1st contact's first name
+    set<ID> setOfAccID = new set<ID>();
+    for(Account accObj:Trigger.new){
+        if(accObj.AnnualRevenue>=30000){
+        setOfAccID.add(accObj.ID);
+        }
+    }
+    List<Contact> conListToAdd = new List<Contact>();
+    for(Account accQuery:[select ID, (select ID, FirstName, createdDate from Contacts order by createdDate ASC limit 1) from Account where ID in:setOfAccID]){
+        for(contact conObj: accQuery.contacts){
+            accQuery.contacts[0].FirstName = 'Premium ' + conObj.FirstName;
+            conListToAdd.add(conObj);
+        }
+    }
+    if(!conListToAdd.isEmpty()){
+        update conListToAdd;
+    }
+}
