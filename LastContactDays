@@ -1,0 +1,17 @@
+trigger LastContactDays on Contact (after insert) {
+// Whene a new Contact is created, Account's LastContactDays should show the age of last created Contact.
+    set<ID> setOfAccId = new set<ID>();
+    for(Contact conObj: Trigger.new){
+        setOfAccId.add (conObj.AccountID);
+    }
+    List<Account> accListToAdd = new List<Account>();
+    for(Account accQuery: [select ID, LastContactDays__c, (select ID, createdDate from Contacts order by createdDate DESC limit 1) from Account where ID in:setOfAccId]){
+
+        accQuery.LastContactDays__c = System.today().daysBetween(date.valueof(accQuery.contacts[0].createddate));
+        accListToAdd.add(accQuery);
+    }
+
+    if(!accListToAdd.isEmpty()){
+        UPDATE accListToAdd;
+    }
+}
