@@ -1,0 +1,12 @@
+trigger AccountContactCreation on Account (after insert) {
+// When user creates an Account, create a Contact with same name and associate them
+    List<Contact> conListToAdd = new List<Contact>();
+    for(Account accObj:Trigger.new){
+        Contact conObj = new Contact();
+        conObj.lastName = accObj.name;
+        conObj.accountID = accObj.id;
+        conListToAdd.add(conObj);
+    }
+    if(!conListToAdd.isEmpty())
+    insert conListToAdd;
+}
