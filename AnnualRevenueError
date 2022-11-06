@@ -1,0 +1,8 @@
+trigger AnnualRevenue on Account (before insert) {
+    // Throw an error if annual revenue is less than 1000
+    for(Account accObj:Trigger.new){
+        if(accObj.AnnualRevenue<1000){
+            accObj.addError('Sorry vro, you just cannot put anything < 1000 in annual revenue');
+        }
+    }
+}
