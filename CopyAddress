@@ -1,0 +1,20 @@
+trigger AddressCopy on Account (before insert) {
+// Write a trigger to copy shipping address to billing address if user doesn't ptovide it
+    for(Account accObj:Trigger.new){
+        if(accObj.billingStreet==null){
+            accObj.billingStreet=accObj.shippingStreet;
+        }
+        if(accObj.billingPostalCode==null){
+            accObj.billingPostalCode=accObj.shippingPostalCode;
+        }
+        if(accObj.billingCity==null){
+            accObj.billingCity=accObj.shippingCity;
+        }
+        if(accObj.billingState==null){
+            accObj.billingState=accObj.shippingState;
+        }
+        if(accObj.billingCountry==null){
+            accObj.billingCountry=accObj.shippingCountry;
+        }
+    }
+}
