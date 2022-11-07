@@ -1,0 +1,24 @@
+trigger AccConAddressChange on Account (after update) {
+// If user updates Account's billing address, copy & paste that address into Contacts' mailing address
+    set<ID> setOfAccID = new set<ID>();
+    for(Account accNewObj:Trigger.new){
+        Account accOldObj = Trigger.oldMap.get(accNewObj.ID);
+        if(accNewObj.billingStreet!=accOldObj.billingStreet){
+            setOfAccID.add(accNewObj.ID);
+        }
+    }
+        List<Contact> conListToAdd = new List<Contact>();
+        for(Account accQuerry : [select ID, billingStreet, billingPostalCode, billingCity, billingState, billingCountry, (select ID, mailingStreet, mailingPostalCode, mailingCity, MailingState, MailingCountry from Contacts) from Account where ID in:setOfAccID]){
+            for(Contact conObj:accQuerry.Contacts){
+                conObj.mailingStreet = accQuerry.billingSTreet;
+                conObj.mailingCity = accQuerry.billingCity;
+                conObj.mailingPostalCode = accQuerry.billingPostalCode;
+                conObj.MailingState = accQuerry.billingState;
+                conObj.MailingCountry = accQuerry.billingCountry;
+                conListToAdd.add(conObj);
+            }
+            if(!conListToAdd.isEmpty()){
+            UPDATE conListToAdd;
+        }
+    }
+}
