@@ -1,0 +1,33 @@
+trigger AverageSalaryPrime on Contact (after insert, after update, after delete) {
+// Account's Average Salary field should reflect the average of all Contacts' salaries.
+// If Average Salary crosses 100,000, check Prime field checkbox in all Contacts of that Account
+
+    set<ID> setOfContactID = new set<ID>();
+    if(Trigger.new!=null && !Trigger.new.isEmpty()){
+    for(Contact conObj:Trigger.new){
+        setOfContactID.add(conObj.AccountID);
+    }
+}
+
+    if(Trigger.old!=null && !Trigger.old.isEmpty()){
+    for(Contact conObj:Trigger.old){
+    setOfContactID.add(conObj.AccountID);
+    }
+}
+
+    List<Account> accListToUpdate = new List<Account>();
+    for(Account accQuery:[SELECT Id, Name, Average_Salary__c, (SELECT ID, Name, Salary__c, Prime__c from Contacts) from Account WHERE Id in:setOfContactID]){
+        Decimal count = 0;
+        for(Contact con:accQuery.Contacts){
+            count = con.Salary__c!=null? count + (con.Salary__c/accQuery.Contacts.size())*100 : count+0;
+            accQuery.Average_Salary__c = count;
+            if(accQuery.Average_Salary__c>100000){
+                con.Prime__c = true;
+            }
+            accListToUpdate.add(accQuery);
+        }
+    }
+        if(!accListToUpdate.isEmpty()){
+            UPDATE accListToUpdate;
+        }
+    }
