@@ -1,0 +1,19 @@
+trigger OppAmountSalary on Opportunity (after insert) {
+// Whenever a new Opportunity is created, divide Account's Average Salary in all its Opportunity's Amount field
+    set<ID> setOfAccountID = new set<ID>();
+    for(Opportunity oppObj:Trigger.new){
+        setOfAccountID.add(oppObj.AccountID);
+    }
+    List<Opportunity> oppListToUpdate = new List<Opportunity>();
+    for(Account accQuery: [SELECT Id, Name, Average_Salary__c, (SELECT Id, Name, Amount from Opportunities) FROM Account WHERE ID in:setOfAccountID]){
+        Decimal count=0;
+        count = count + (accQuery.Average_Salary__c/accQuery.Opportunities.size());
+        for(Opportunity opp:accQuery.Opportunities){
+            opp.Amount = count;
+            oppListToUpdate.add(opp);
+        }
+    }
+    if(!oppListToUpdate.isEmpty()){
+        UPDATE oppListToUpdate;
+    }
+}
