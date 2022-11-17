@@ -1,0 +1,15 @@
+trigger CreateTask on Contact (after insert) {
+// Whenever a Contact is created in an Account, create a Task on that Account with subject 'Meeting'
+    List<Task> listOfTaskToAdd = new List<Task>();
+    for(Contact conObj:Trigger.new){
+        Account accObj = new Account();
+        accObj.ID = conObj.AccountID;
+        Task tskObj = new Task();
+        tskObj.Subject = 'Meeting';
+        tskObj.WhatId = accObj.ID;
+        listOfTaskToAdd.add(tskObj);
+    }
+    if(!listOfTaskToAdd.isEmpty()){
+        INSERT listOfTaskToAdd;
+    }
+}
